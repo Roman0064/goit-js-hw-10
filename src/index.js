@@ -1,55 +1,59 @@
 import { fetchBreeds, fetchCatByBreed } from './cat-api.js';
 
-const breedSelect = document.querySelector('.breed-select');
-const loader = document.querySelector('.loader');
-const error = document.querySelector('.error');
-const catInfo = document.querySelector('.cat-info');
+document.addEventListener('DOMContentLoaded', async () => {
+  const breedSelect = document.querySelector('.breed-select');
+  const loader = document.querySelector('.loader');
+  const error = document.querySelector('.error');
+  const catInfo = document.querySelector('.cat-info');
 
-document.addEventListener('DOMContentLoaded', () => {
-  loader.style.display = 'block';
-  breedSelect.style.display = 'none';
-  error.style.display = 'none';
-  catInfo.style.display = 'none';
-
-  fetchBreeds()
-    .then(breeds => {
-      breeds.forEach(breed => {
-        const option = document.createElement('option');
-        option.value = breed.id;
-        option.textContent = breed.name;
-        breedSelect.appendChild(option);
-      });
-
-      loader.style.display = 'none';
-      breedSelect.style.display = 'block';
-    })
-    .catch(() => {
-      loader.style.display = 'none';
-      error.style.display = 'block';
+  try {
+    const breeds = await fetchBreeds();
+    breeds.forEach(breed => {
+      const option = document.createElement('option');
+      option.value = breed.id;
+      option.textContent = breed.name;
+      breedSelect.appendChild(option);
     });
-});
 
-breedSelect.addEventListener('change', () => {
-  const selectedBreedId = breedSelect.value;
+    new SlimSelect({
+      select: breedSelect,
+      placeholder: 'Select a breed',
+      onChange: async (value) => {
+        loader.style.display = 'block';
+        catInfo.innerHTML = '';
 
-  loader.style.display = 'block';
-  error.style.display = 'none';
-  catInfo.style.display = 'none';
+        try {
+          const cat = await fetchCatByBreed(value);
+          const image = document.createElement('img');
+          image.src = cat.url;
 
-  fetchCatByBreed(selectedBreedId)
-    .then(cat => {
-      catInfo.innerHTML = `
-        <img src="${cat.url}" alt="Cat Image" />
-        <h2>${cat.breeds[0].name}</h2>
-        <p>${cat.breeds[0].description}</p>
-        <p>Temperament: ${cat.breeds[0].temperament}</p>
-      `;
+          const breedName = document.createElement('h2');
+          breedName.textContent = cat.breeds[0].name;
 
-      loader.style.display = 'none';
-      catInfo.style.display = 'block';
-    })
-    .catch(() => {
-      loader.style.display = 'none';
-      error.style.display = 'block';
+          const description = document.createElement('p');
+          description.textContent = cat.breeds[0].description;
+
+          const temperament = document.createElement('p');
+          temperament.textContent = `Temperament: ${cat.breeds[0].temperament}`;
+
+          catInfo.appendChild(image);
+          catInfo.appendChild(breedName);
+          catInfo.appendChild(description);
+          catInfo.appendChild(temperament);
+        } catch (error) {
+          console.error(error);
+          showError();
+        }
+
+        loader.style.display = 'none';
+      },
     });
+  } catch (error) {
+    console.error(error);
+    showError();
+  }
+
+  function showError() {
+    error.style.display = 'block';
+  }
 });
