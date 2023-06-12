@@ -84,7 +84,7 @@ window.addEventListener('load', () => {
 const requestOptions = {
   headers: {
     'x-api-key':
-      'live_hdCYm5Y6kk0DIc6vTTnPkOZhRkUoSjaoR7r5Y0GpyHWMEfHlFMlg49Nrte1HZMoS',
+      'live_LrNQPY5bIN0SHp9Hiy3invtxFBF49wrfEDzln9OiNyaSaBHWj2qbtwIAXTo0ldLb',
   },
 };
 
